@@ -22,7 +22,7 @@
             "Action": [
                 "s3:PutObject"
             ],
-            "Resource": "arn:aws:s3:::tmp-data-marts/*"
+            "Resource": "*"
         }
     ]
 }

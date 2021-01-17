@@ -54,8 +54,8 @@ build/etl-lambda: build/lambda-package.zip build/lambda-layer build/iam-role
 	-aws lambda delete-function --function-name $(ETL_LAMBDA_NAME)
 	aws lambda create-function --function-name $(ETL_LAMBDA_NAME) \
 	--zip-file fileb://build/lambda-package.zip --handler etl_handler.lambda_handler --runtime $(LAMBDA_RUNTIME) \
-	--role $$(cat build/iam-role | jq -r "first(..|.arn?)") \
-	--layers $(NUMPY_LAYER_ARN) $$(cat build/lambda-layer | jq -r .LayerVersionArn) > build/etl-lambda \
+	--role $$(cat build/iam-role | yq -r "first(..|.arn?)") \
+	--layers $(NUMPY_LAYER_ARN) $$(cat build/lambda-layer | yq -r .LayerVersionArn) > build/etl-lambda \
 	--environment '{"Variables": {"DEST_TABLE": "$(DEST_TABLE)", "IMAGE_SIZE": "$(IMAGE_SIZE)"}}' \
 	--timeout 900 \
 	--memory-size 1024
@@ -71,9 +71,9 @@ preprocess: build/etl-lambda build/rawdata-bucket
 # provision web service and print help information about it
 webservice: build/ec2
 	@echo "Test data is preprocessed. Web API service is running. \n\n"
-	@echo The service is running at: $$(cat build/ec2 | jq -r '.instances | .[0].public_dns_name')":8080/plants?year=2018&state=AL&top_n=4\n"
-	@echo API documentation: $$(cat build/ec2 | jq -r '.instances | .[0].public_dns_name')":8080/docs\n"
-	@echo Example call: $$(cat build/ec2 | jq -r '.instances | .[0].public_dns_name')":8080/imagers/test-well?min_depth=9000.1&max_depth=9000.3&colormap=gist_earth\n"
+	@echo The service is running at: $$(cat build/ec2 | yq -r '.instances | .[0].public_dns_name')":8080/plants?year=2018&state=AL&top_n=4\n"
+	@echo API documentation: $$(cat build/ec2 | yq -r '.instances | .[0].public_dns_name')":8080/docs\n"
+	@echo Example call: $$(cat build/ec2 | yq -r '.instances | .[0].public_dns_name')":8080/imagers/test-well?min_depth=9000.1&max_depth=9000.3&colormap=gist_earth\n"
 	@echo "If colormap is not present the result data is a 2d (height, width) array."
 	@echo "If it was provided, the data is a 3d (height, width, channel) array"
 	@echo "colormap name - is a colormap function name from matplotlib.cm package"
@@ -82,8 +82,8 @@ webservice: build/ec2
 .PHONY: clean
 clean:
 	-aws lambda delete-function --function-name $(ETL_LAMBDA_NAME)
-	-aws lambda delete-layer-version --layer-name $$(cat build/lambda-layer | jq -r .LayerArn) \
-	--version-number $$(cat build/lambda-layer | jq -r .Version)
+	-aws lambda delete-layer-version --layer-name $$(cat build/lambda-layer | yq -r .LayerArn) \
+	--version-number $$(cat build/lambda-layer | yq -r .Version)
 	ansible-playbook infrastructure/cleanup-play.yml
 
 # adds random prefix to the names of created AWS resources
@@ -94,10 +94,10 @@ clean:
 salt: SALT := $(shell echo $$RANDOM)
 salt:
 	cat infrastructure/config.yml | yq -y '. + { \
-	 iam_role_name: (.iam_role_name + "_$(SALT)"), \
-	 etl_lambda_name: (.etl_lambda_name + "_$(SALT)"), \
-	 well_imagers_table: (.well_imagers_table + "_$(SALT)"), \
-	 sg_name: (.sg_name + "_$(SALT)"), \
-	 iam_policy_name: (.iam_policy_name + "_$(SALT)"), \
+	 iam_role_name: (.iam_role_name + "--$(SALT)"), \
+	 etl_lambda_name: (.etl_lambda_name + "--$(SALT)"), \
+	 well_imagers_table: (.well_imagers_table + "--$(SALT)"), \
+	 sg_name: (.sg_name + "--$(SALT)"), \
+	 iam_policy_name: (.iam_policy_name + "--$(SALT)"), \
 	}' > infrastructure/config.yml.tmp
 	mv infrastructure/config.yml.tmp infrastructure/config.yml
