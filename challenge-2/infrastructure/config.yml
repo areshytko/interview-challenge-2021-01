@@ -12,3 +12,4 @@ well_imagers_table: ch2-well-imagers
 images_size: 150
 sg_name: ch2-sg
 iam_policy_name: ch2-data-access-policy
+test_data_file: "./data/img.csv"
