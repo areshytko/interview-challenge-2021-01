@@ -1,0 +1,34 @@
+- hosts: localhost
+  name: Create infrastructure
+  remote_user: ubuntu
+  gather_facts: False
+  vars_files:
+    - config.yml
+
+  roles:
+    - role: common_infrastructure
+
+- hosts: localhost
+  name: Create infrastructure
+  remote_user: ubuntu
+  gather_facts: False
+  vars_files:
+    - config.yml
+
+  tasks:
+    - name: Create DynamoDB table
+      dynamodb_table:
+        name: "{{ well_imagers_table }}"
+        region: "{{ region }}"
+        hash_key_name: well
+        hash_key_type: STRING
+        range_key_name: depth
+        range_key_type: NUMBER
+        write_capacity: 25
+      register: dynamodb_table_result
+    - name: Save information about created DynamoDB table
+      copy:
+        content: "{{ dynamodb_table_result }}"
+        dest: ../build/dynamodb_table
+
+- import_playbook: webservice-play.yml

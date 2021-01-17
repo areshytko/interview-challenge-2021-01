@@ -1,0 +1,14 @@
+aws_ssh_key: areshytko
+ami_id: ami-0e1ce3e0deb8896d2
+instance_type: t2.micro
+region: eu-central-1
+ec2_instance_tag: challenge2_ws_instance
+python_version: 3.7
+lambda_layer_name: pandas-pil
+etl_lambda_name: process-well-imager
+rawdata_bucket: challenge2-rawdata-bucket
+iam_role_name: ch2-etl-lambda-role
+well_imagers_table: ch2-well-imagers
+images_size: 150
+sg_name: ch2-sg
+iam_policy_name: ch2-data-access-policy

@@ -1,0 +1,14 @@
+- hosts: localhost
+  remote_user: ubuntu
+  gather_facts: False
+  vars_files:
+    - config.yml
+
+  roles:
+    - role: common_cleanup
+
+  tasks:
+    - dynamodb_table:
+        name: "{{ well_imagers_table }}"
+        region: "{{ region }}"
+        state: absent

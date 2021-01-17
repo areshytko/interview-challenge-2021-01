@@ -3,7 +3,7 @@
     state: absent
     region: "{{ region }}"
     filters:
-      tag:count_tag: "{{ ec2_instance_tag }}"
+      tag:Name: "{{ ec2_instance_tag }}"
   delegate_to: localhost
   run_once: true
 - name: Delete Sequrity Group

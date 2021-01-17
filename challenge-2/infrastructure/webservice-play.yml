@@ -1,0 +1,34 @@
+- hosts: aws_ec2
+  name: Provision web service
+  remote_user: ubuntu
+  gather_facts: true
+  vars_files:
+    - config.yml
+
+  roles:
+    - role: provision_webservice
+      vars:
+        requirements: requirements.service.txt
+
+  tasks:
+    - name: deploy web service sources (TODO replace it with a proper CI/CD deployment scheme)
+      synchronize:
+        src: ../src
+        dest: /home/ubuntu
+
+    - name: deploy common sources (TODO replace it with a proper CI/CD deployment scheme)
+      synchronize:
+        src: ../../common/src
+        dest: /home/ubuntu
+
+    - name: possibly kill previously running web server (ignore errors)
+      shell: pkill -f webserver:app
+      ignore_errors: yes
+
+    - name: start web server
+      shell: |
+        cd /home/ubuntu/src
+        export REGION=$(ec2metadata --availability-zone | sed 's/.$//') && \
+        nohup {{virtualenv}}/bin/uvicorn webserver:app --host 0.0.0.0 --port 8080 &
+      environment:
+        IMAGERS_TABLE: "{{ well_imagers_table }}"

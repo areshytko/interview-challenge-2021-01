@@ -67,10 +67,11 @@
     region: "{{ region }}"
     wait: true
     exact_count: 1
-    count_tag: "{{ ec2_instance_tag }}"
+    count_tag:
+      Name: "{{ ec2_instance_tag }}"
     instance_tags:
       managed_by: ansible
-      count_tag: "{{ ec2_instance_tag }}"
+      Name: "{{ ec2_instance_tag }}"
   register: ec2
 - name: Save information about EC2 instances
   copy:
