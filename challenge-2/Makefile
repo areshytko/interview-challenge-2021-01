@@ -10,7 +10,7 @@ ETL_LAMBDA_NAME := $(shell cat infrastructure/config.yml | yq -r .etl_lambda_nam
 RAWDATA_BUCKET := $(shell cat infrastructure/config.yml | yq -r .rawdata_bucket)
 DEST_TABLE := $(shell cat infrastructure/config.yml | yq -r .well_imagers_table)
 IMAGE_SIZE := $(shell cat infrastructure/config.yml | yq -r .images_size)
-TEST_DATA_FILE := ./data/img.csv
+TEST_DATA_FILE := $(shell cat infrastructure/config.yml | yq -r .test_data_file)
 
 # init local build environment
 init: requirements.txt
