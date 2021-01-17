@@ -2,7 +2,8 @@
 
 ### Prerequisites
 
-- `jq` tool installed locally
+- `jq` and `zip` tools installed locally
+- `docker` installed locally
 - `python` 3.7+ and `pip` installed locally
 - AWS account with programmatic access (key and secret key)
 - SSH puplic key is uploaded to AWS EC2 console
