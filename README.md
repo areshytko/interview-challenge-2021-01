@@ -40,12 +40,12 @@ the steps are the same as for challenge 1.
     - use Data Lake instead of DWH
     - abstract raw data via Data Marts
     - implement data processing in a manual batch mode
-- data versioning, data lineage, metadata service weren't implemented due to challenge time limits
-- since the data volume is small no distributed data processing was used. Horizontal scaling can still be achieved but if the data volume will be bigger than in test cases, the solution needs to be reworked completelly.
-- since the data transformation worklow is simple, sigle serverless function was used. In case it will evolve to a more complex one, it should be replaced by a proper worklow manager (Apache Airflow, AWS Step Function, etc.)
-- infrastructure is managed via Ansible and make tools. make builds lambda layer and function and orchestrates overall workflow. Ansible builds most of the AWS infrastructure.
-- push based configuration approach
-- FastAPI Python framework on EC2 instance is used for Web service
+- Data versioning, data lineage, metadata service weren't implemented due to time limits of the challenge.
+- Since the data volume is small no distributed data processing was used.
+- Since the data transformation worklow is simple, single serverless function was used. In case the complexity will increase, the solution should be replaced by a proper worklow manager (Apache Airflow, AWS Step Function, etc.).
+- Infrastructure is managed via `Ansible` and `make` tools. `make` builds lambda layer and function and orchestrates overall workflow. `Ansible` builds most of the AWS infrastructure.
+- Push based configuration approach.
+- FastAPI Python framework on EC2 instance is used for Web service.
 - To increase performance the data is cached locally on a web server FS. Since the data is uncheangable, no cache invalidation is needed. But cache eviction must be implemented.
 
 ## Challenge 2
