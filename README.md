@@ -33,6 +33,8 @@ the steps are the same as for challenge 1.
 
 ## Challenge 1
 
+![arch diagram](aiq-challenge.png)
+
 - The following principles were used:
     - use Data Lake instead of DWH
     - abstract raw data via Data Marts
