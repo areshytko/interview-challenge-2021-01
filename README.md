@@ -2,7 +2,7 @@
 
 ## Challenge 1
 
-![arch diagram](aiq-challenge.png)
+![arch diagram](architecture.png)
 
 - The solution is based on a AWS cloud platform.
 - The following principles were used:
