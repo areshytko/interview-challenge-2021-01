@@ -1,0 +1,7 @@
+iam_policy_name: data-access-policy
+region: eu-central-1
+sg_name: my-sg
+ec2_instance_tag: challenge_ws_instance
+iam_role_name: etl-lambda-role
+rawdata_bucket: challenge-rawdata-bucket
+build_dir: ../build

@@ -1,0 +1,41 @@
+- name: Terminate ec2 instances
+  ec2_instance:
+    state: absent
+    region: "{{ region }}"
+    filters:
+      tag:count_tag: "{{ ec2_instance_tag }}"
+  delegate_to: localhost
+  run_once: true
+- name: Delete Sequrity Group
+  ec2_group:
+    name: "{{ sg_name }}"
+    region: "{{ region }}"
+    state: absent
+  delegate_to: localhost
+  run_once: true
+- name: Delete policy for the iam role
+  iam_policy:
+    iam_type: role
+    iam_name: "{{ iam_role_name }}"
+    policy_name: "{{ iam_policy_name }}"
+    state: absent
+  delegate_to: localhost
+  run_once: true
+- name: Delete iam role
+  iam_role:
+    name: "{{ iam_role_name }}"
+    state: absent
+  delegate_to: localhost
+  run_once: true
+- name: Delete raw data bucket
+  aws_s3:
+    bucket: "{{ rawdata_bucket }}"
+    mode: delete
+  delegate_to: localhost
+  run_once: true
+- name: Remove build artifact directory
+  file:
+    state: absent
+    path: "{{ build_dir }}"
+  delegate_to: localhost
+  run_once: true

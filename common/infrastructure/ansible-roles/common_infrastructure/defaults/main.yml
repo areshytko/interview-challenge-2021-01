@@ -1,0 +1,12 @@
+rawdata_bucket: challenge-rawdata-bucket
+iam_role_name: etl-lambda-role
+iam_policy_name: data-access-policy
+iam_policy_file: iam-policy.json
+sg_name: my-sg
+# registered ssh key to use. Use you default id_rsa.pub or modify the code
+aws_ssh_key: areshytko
+ami_id: ami-0e1ce3e0deb8896d2 # Ubuntu Server 18.04 LTS (HVM), SSD Volume Type
+instance_type: t2.micro
+region: eu-central-1
+ec2_instance_tag: challenge_ws_instance
+build_dir: ../build

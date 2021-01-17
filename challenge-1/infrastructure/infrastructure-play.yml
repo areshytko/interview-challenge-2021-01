@@ -1,0 +1,25 @@
+- hosts: localhost
+  name: Create infrastructure
+  remote_user: ubuntu
+  gather_facts: False
+
+  tasks:
+    - include_vars: config.yml
+    - name: Create Datamarts Bucket
+      aws_s3:
+        bucket: "{{ datamarts_bucket }}"
+        mode: create
+
+- hosts: localhost
+  name: Create infrastructure
+  remote_user: ubuntu
+  gather_facts: False
+  vars_files:
+    - config.yml
+
+  roles:
+    - role: common_infrastructure
+      vars:
+        ec2_instance_tag: "{{ ec2_instance_tag }}"
+
+- import_playbook: webservice-play.yml

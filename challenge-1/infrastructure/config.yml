@@ -1,0 +1,13 @@
+# registered ssh key to use. Use you default id_rsa.pub or modify the code
+aws_ssh_key: areshytko
+ami_id: ami-0e1ce3e0deb8896d2 # Ubuntu Server 18.04 LTS (HVM), SSD Volume Type
+instance_type: t2.micro
+region: eu-central-1
+datamarts_bucket: tmp-data-marts
+datamarts_key_prefix: "datamart-"
+ec2_instance_tag: challenge1_ws_instance
+python_version: 3.7
+lambda_layer_name: pandas-fastparquet
+elt_lambda_name: annual-netgen-etl
+rawdata_bucket: challenge1-rawdata-bucket
+iam_role_name: ch1-etl-lambda-role

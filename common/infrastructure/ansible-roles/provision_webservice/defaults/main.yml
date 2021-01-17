@@ -1,0 +1,3 @@
+python_version: 3.7
+virtualenv: /home/ubuntu/.venv
+requirements: requirements.txt

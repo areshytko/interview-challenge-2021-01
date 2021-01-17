@@ -1,0 +1,91 @@
+- name: Create build directory
+  file:
+    path: "{{ build_dir }}"
+    state: directory
+
+- name: Create Raw Data Bucket
+  aws_s3:
+    bucket: "{{ rawdata_bucket }}"
+    mode: create
+  register: rawdata_bucket_result
+- name: Save information about created Raw Data Bucket
+  copy:
+    content: "{{ rawdata_bucket_result }}"
+    dest: "{{ build_dir }}/rawdata-bucket"
+
+- name: Create iam role
+  iam_role:
+    name: "{{ iam_role_name }}"
+    assume_role_policy_document: "{{ lookup('file','role-trust-policy.json') }}"
+    description: Role for ETL lambda jobs
+    state: present
+  register: lambda_role
+- name: Save information about created IAM Role
+  copy:
+    content: "{{ lambda_role }}"
+    dest: "{{ build_dir }}/iam-role"
+
+- name: Create policy for the iam role
+  iam_policy:
+    iam_type: role
+    iam_name: "{{ lambda_role.iam_role.role_name }}"
+    policy_name: "{{ iam_policy_name }}"
+    policy_document: "{{ iam_policy_file }}"
+    state: present
+  register: policy_result
+- name: Save information about created policy
+  copy:
+    content: "{{ policy_result }}"
+    dest: "{{ build_dir }}/iam-policy"
+
+- name: Create Sequrity Group
+  ec2_group:
+    name: "{{ sg_name }}"
+    description: security group for web service instances
+    region: "{{ region }}"
+    rules:
+      - proto: all
+        group_name: "{{ sg_name }}"
+      - proto: tcp
+        ports:
+          - 8080
+          - 22
+        cidr_ip: 0.0.0.0/0
+  register: sg_result
+- name: Save information about created security group
+  copy:
+    content: "{{ sg_result }}"
+    dest: "{{ build_dir }}/ec2-sg"
+
+- name: Create ec2 instance for Web Service
+  ec2:
+    key_name: "{{ aws_ssh_key }}"
+    group: "{{ sg_name }}"
+    instance_type: "{{ instance_type }}"
+    instance_profile_name: "{{ iam_role_name }}"
+    image: "{{ ami_id }}"
+    region: "{{ region }}"
+    wait: true
+    exact_count: 1
+    count_tag: "{{ ec2_instance_tag }}"
+    instance_tags:
+      managed_by: ansible
+      count_tag: "{{ ec2_instance_tag }}"
+  register: ec2
+- name: Save information about EC2 instances
+  copy:
+    content: "{{ ec2 }}"
+    dest: "{{ build_dir }}/ec2"
+
+- name: Add all instance public IPs to host group
+  add_host:
+    hostname: "{{ item.public_dns_name }}"
+    groups: aws_ec2
+  loop: "{{ ec2.instances }}"
+
+- name: Wait for SSH to come up
+  delegate_to: "{{ item.public_dns_name }}"
+  wait_for_connection:
+    delay: 60
+    timeout: 320
+  loop: "{{ ec2.instances }}"
