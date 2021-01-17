@@ -4,8 +4,9 @@
 
 ![arch diagram](aiq-challenge.png)
 
+- The solution is based on a AWS cloud platform.
 - The following principles were used:
-    - use Data Lake instead of DWH
+    - use data lake approach instead of DWH
     - abstract raw data via Data Marts
     - implement data processing in a manual batch mode
 - Data versioning, data lineage, metadata service weren't implemented due to time limits of the challenge.
