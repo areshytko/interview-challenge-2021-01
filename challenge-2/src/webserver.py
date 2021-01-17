@@ -1,3 +1,6 @@
+"""
+Web service main file to API access of well imager slices.
+"""
 
 import os
 from typing import List, Optional, Union
@@ -11,6 +14,9 @@ app = FastAPI()
 
 
 class ImagerModel(BaseModel):
+    """
+    GET: /imagers result schema
+    """
     well_id: str
     min_depth: float
     max_depth: float
@@ -22,6 +28,25 @@ def get_imager(well_id: str,
                min_depth: float,
                max_depth: float,
                colormap: Optional[str] = None) -> ImagerModel:
+    """
+    GET: /imagers route handler
+
+    Parameters
+    ----------
+    well_id : str
+        well id
+    min_depth : float
+        slice from
+    max_depth : float
+        slice to
+    colormap : Optional[str], optional
+        name of colormap from `matplotlib.cm` package, by default None
+
+    Returns
+    -------
+    ImagerModel
+        imager data
+    """
 
     img = query_imager(
         well_id=well_id,

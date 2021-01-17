@@ -1,4 +1,5 @@
 """
+data querying functionality
 """
 
 from typing import Optional
@@ -10,6 +11,9 @@ from matplotlib import cm
 
 
 def minmax_normalize(data: np.ndarray) -> np.ndarray:
+    """
+    minmax normalizaion of numpy array
+    """
     minval, maxval = np.min(data), np.max(data)
     if minval == maxval:
         norm_data = data * 0
@@ -19,6 +23,15 @@ def minmax_normalize(data: np.ndarray) -> np.ndarray:
 
 
 def apply_colormap(img: np.ndarray, colormap: str) -> np.ndarray:
+    """
+    Apply color man to image array.
+
+    Parameters
+    ----------
+    img : np.ndarray
+    colormap : str
+        name of colormap from `matplotlib.cm` package
+    """
     img = minmax_normalize(img)
     colormap = getattr(cm, colormap)
     result = np.uint8(colormap(img)*255)
@@ -31,6 +44,25 @@ def query_imager(well_id: str,
                  max_depth: float,
                  colormap: Optional[str] = None,
                  region_name: Optional[str] = None) -> np.ndarray:
+    """
+    Query imager data by well id and depth range from DynamoDB table.
+
+    Parameters
+    ----------
+    well_id : str
+    imager_table : str
+    min_depth : float
+    max_depth : float
+    colormap : Optional[str], optional
+        name of colormap from `matplotlib.cm` package, by default None
+    region_name : Optional[str], optional
+        AWS region_name for DynamoDB table, by default None
+
+    Returns
+    -------
+    np.ndarray
+        imager slice for the well, if none is found, empty array is returned
+    """
 
     dynamodb = boto3.resource('dynamodb', region_name=region_name)
     table = dynamodb.Table(imager_table)

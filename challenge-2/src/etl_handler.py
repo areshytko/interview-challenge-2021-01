@@ -1,4 +1,5 @@
 """
+Entrypoint for AWS Lambda
 """
 
 import os
@@ -9,6 +10,19 @@ from challenge2.etl import load_dynamodb, preprocess
 
 
 def lambda_handler(event, context):
+    """
+    Entrypoint for AWS Lambda 
+
+    Expected event schema:
+    {
+        "bucket": str, # bucket with source raw data
+        "key": str, # key of the object with source raw data
+    }
+
+    Also requires the following environment variables:
+    - DEST_TABLE - DynamoDB table to store results
+    - IMAGE_SIZE - the result width of the imager
+    """
 
     bucket, well = event["bucket"], event["key"]
     dest_table = os.environ['DEST_TABLE']
