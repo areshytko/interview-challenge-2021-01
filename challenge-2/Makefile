@@ -7,9 +7,10 @@ LAMBDA_RUNTIME := python${PYTHON_VERSION}
 LAMBDA_LAYER := $(shell cat infrastructure/config.yml | yq -r .lambda_layer_name)
 NUMPY_LAYER_ARN := "arn:aws:lambda:eu-central-1:292169987271:layer:AWSLambda-Python37-SciPy1x:35"
 ETL_LAMBDA_NAME := $(shell cat infrastructure/config.yml | yq -r .etl_lambda_name)
-DATAMARTS_BUCKET := $(shell cat infrastructure/config.yml | yq -r .datamarts_bucket)
-DATAMART_KEY_PREFIX := $(shell cat infrastructure/config.yml | yq -r .datamarts_key_prefix)
 RAWDATA_BUCKET := $(shell cat infrastructure/config.yml | yq -r .rawdata_bucket)
+DEST_TABLE := $(shell cat infrastructure/config.yml | yq -r .well_imagers_table)
+IMAGE_SIZE := $(shell cat infrastructure/config.yml | yq -r .images_size)
+TEST_DATA_FILE := ./data/img.csv
 
 # init local build environment
 init: requirements.txt
@@ -35,7 +36,7 @@ build/lambda-layer: build/layer-package.zip
 build/lambda-package.zip: $(shell find src -type f -name "*.py")
 	rm -f build/lambda-package.zip
 	cd src && zip -r ../build/lambda-package.zip .
-	cd ../common/src && zip -g -r ../../challenge-1/build/lambda-package.zip .
+	cd ../common/src && zip -g -r ../../challenge-2/build/lambda-package.zip .
 
 # The following targets are created during Ansible infrastructure provision
 
@@ -55,24 +56,27 @@ build/etl-lambda: build/lambda-package.zip build/lambda-layer build/iam-role
 	--zip-file fileb://build/lambda-package.zip --handler etl_handler.lambda_handler --runtime $(LAMBDA_RUNTIME) \
 	--role $$(cat build/iam-role | jq -r "first(..|.arn?)") \
 	--layers $(NUMPY_LAYER_ARN) $$(cat build/lambda-layer | jq -r .LayerVersionArn) > build/etl-lambda \
-	--environment '{"Variables": {"DEST_BUCKET": "$(DATAMARTS_BUCKET)", "DATAMART_KEY_PREFIX": "$(DATAMART_KEY_PREFIX)"}}' \
-	--timeout 600 \
+	--environment '{"Variables": {"DEST_TABLE": "$(DEST_TABLE)", "IMAGE_SIZE": "$(IMAGE_SIZE)"}}' \
+	--timeout 900 \
 	--memory-size 1024
 
 # upload test example data to S3 storage
 raw-data: build/rawdata-bucket
-	export PYTHONPATH=../common/src:$${PYTHONPATH} && ./src/upload.py --bucket $(RAWDATA_BUCKET) --key egrid2018_data_v2.xlsx ./data/egrid2018_data_v2.xlsx
+	aws s3 cp $(TEST_DATA_FILE) s3://$(RAWDATA_BUCKET)/test-well
 
 # run ETL job synchronosly on test example data
 preprocess: build/etl-lambda build/rawdata-bucket
-	aws lambda invoke --function-name $(ETL_LAMBDA_NAME) --payload '{ "bucket": "$(RAWDATA_BUCKET)", "key": "egrid2018_data_v2.xlsx", "year": "2018" }' response.json
+	aws lambda invoke --function-name $(ETL_LAMBDA_NAME) --payload '{ "bucket": "$(RAWDATA_BUCKET)", "key": "test-well"}' build/preprocess.json
 
 # provision web service and print help information about it
 webservice: build/ec2
 	@echo "Test data is preprocessed. Web API service is running. \n\n"
 	@echo The service is running at: $$(cat build/ec2 | jq -r '.instances | .[0].public_dns_name')":8080/plants?year=2018&state=AL&top_n=4\n"
 	@echo API documentation: $$(cat build/ec2 | jq -r '.instances | .[0].public_dns_name')":8080/docs\n"
-	@echo Example call: $$(cat build/ec2 | jq -r '.instances | .[0].public_dns_name')":8080/plants?year=2018&state=AL&top_n=4" 
+	@echo Example call: $$(cat build/ec2 | jq -r '.instances | .[0].public_dns_name')":8080/imagers/test-well?min_depth=9000.1&max_depth=9000.3&colormap=gist_earth\n"
+	@echo "If colormap is not present the result data is a 2d (height, width) array."
+	@echo "If it was provided, the data is a 3d (height, width, channel) array"
+	@echo "colormap name - is a colormap function name from matplotlib.cm package"
 
 # removes all build artifacts
 .PHONY: clean
@@ -92,7 +96,7 @@ salt:
 	cat infrastructure/config.yml | yq -y '. + { \
 	 iam_role_name: (.iam_role_name + "_$(SALT)"), \
 	 etl_lambda_name: (.etl_lambda_name + "_$(SALT)"), \
-	 datamarts_bucket: (.datamarts_bucket + "_$(SALT)"), \
+	 well_imagers_table: (.well_imagers_table + "_$(SALT)"), \
 	 sg_name: (.sg_name + "_$(SALT)"), \
 	 iam_policy_name: (.iam_policy_name + "_$(SALT)"), \
 	}' > infrastructure/config.yml.tmp

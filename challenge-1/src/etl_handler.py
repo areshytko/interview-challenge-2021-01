@@ -1,4 +1,5 @@
 """
+Entrypoint for AWS Lambda
 """
 
 import os
@@ -9,14 +10,18 @@ from challenge1.etl import preprocess
 
 
 def lambda_handler(event, context):
-    """[summary]
+    """Entrypoint for AWS Lambda 
 
-    Parameters
-    ----------
-    event : [type]
-        [description]
-    context : [type]
-        [description]
+    Expected event schema:
+    {
+        "bucket": str, # bucket with source raw data
+        "key": str, # key of the object with source raw data
+        "year": int # year of the source raw data
+    }
+
+    Also requires the following environment variables:
+    - DEST_BUCKET - bucket for datamarts preprocessing results
+    - DATAMART_KEY_PREFIX - prefix for the name of the datamart
     """
 
     # @TODO get dataset uuid and read its bucket and key from metadata service instead of this

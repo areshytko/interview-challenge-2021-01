@@ -8,6 +8,8 @@ datamarts_key_prefix: "datamart-"
 ec2_instance_tag: challenge1_ws_instance
 python_version: 3.7
 lambda_layer_name: pandas-fastparquet
-elt_lambda_name: annual-netgen-etl
+etl_lambda_name: annual-netgen-etl
 rawdata_bucket: challenge1-rawdata-bucket
 iam_role_name: ch1-etl-lambda-role
+sg_name: ch1-sg
+iam_policy_name: ch1-data-access-policy

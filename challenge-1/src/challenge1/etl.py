@@ -1,4 +1,5 @@
 """
+preprocessing functionality
 """
 
 import pandas as pd
@@ -18,6 +19,17 @@ def read_raw_data(input_path: str) -> RawNetGenerationData:
 
 
 def preprocess(input_path: str, output_path: str):
+    """
+    Computes relative annual net generation data, filters invalid data,
+    stores the data to the datamart format.
+
+    Parameters
+    ----------
+    input_path : str
+        local FS path to the input data in RawNetGenerationData format
+    output_path : str
+        local FS path to store the output data in NetGenerationData format
+    """
     data = read_raw_data(input_path)
     data = filter_invalid(data).df
     data = data.rename(columns=NAME_CONVERSION)[sorted(NAME_CONVERSION.values())]
@@ -37,17 +49,10 @@ def preprocess(input_path: str, output_path: str):
 
 
 def filter_invalid(data: RawNetGenerationData) -> RawNetGenerationData:
-    """[summary]
-
-    Parameters
-    ----------
-    data : RawNetGenerationData
-        [description]
-
-    Returns
-    -------
-    RawNetGenerationData
-        [description]
+    """
+    Invalid data filtering:
+    - NaNs are dropped
+    - negative annual net generation data is assumed as invalid and is dropped
     """
     data = data.df.dropna(subset=data.dtype().keys())
     data = data.loc[data.PLNGENAN >= 0]

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """
+CLI for uploading raw data to AWS S3 Data Lake
 """
 
 import boto3

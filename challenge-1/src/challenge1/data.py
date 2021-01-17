@@ -1,4 +1,5 @@
 """
+Data schema definitions
 """
 
 import numpy as np
@@ -6,6 +7,9 @@ from datautils.typed import TypedDataFrame
 
 
 class RawNetGenerationData(TypedDataFrame):
+    """
+    Raw annual net generation data format.
+    """
 
     VERSION = '1.0.0'
 
@@ -26,6 +30,7 @@ class RawNetGenerationData(TypedDataFrame):
 
 class NetGenerationData(TypedDataFrame):
     """
+    Data format for annual net generation Data marts.
     """
 
     VERSION = '1.0.0'

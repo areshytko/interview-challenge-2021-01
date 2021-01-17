@@ -1,4 +1,6 @@
-
+"""
+Web service main file to API access for Plant Annual Net generation datamarts
+"""
 import os
 from dataclasses import dataclass
 from typing import List, Optional
@@ -14,6 +16,9 @@ app = FastAPI()
 
 
 class PlanNetGenerationModel(BaseModel):
+    """
+    GET: /plants result schema
+    """
     plant_name: str
     state: str
     annual_netgen_abs: float
@@ -36,6 +41,21 @@ class Config:
 
 
 def get_datafile(year: int) -> str:
+    """
+    Retrieves latest datamart file for a given year.
+    Additionally caches the result to the local FS.
+    @TODO: implement cache eviction.
+
+    Parameters
+    ----------
+    year : int
+        year of the data
+
+    Returns
+    -------
+    str
+        path to the file in local FS
+    """
     config = Config.get()
 
     key = f"{config.datamart_key_prefix}{year}"
@@ -50,6 +70,9 @@ def get_datafile(year: int) -> str:
 
 
 def convert(data: NetGenerationData) -> List[PlanNetGenerationModel]:
+    """
+    Converts retrieved data to the output service format.
+    """
     result = []
     for _, row in data.df.iterrows():
         item = PlanNetGenerationModel(
@@ -66,6 +89,23 @@ def convert(data: NetGenerationData) -> List[PlanNetGenerationModel]:
 def get_plants(year: int,
                top_n: Optional[int] = None,
                state: Optional[str] = None) -> List[PlanNetGenerationModel]:
+    """
+    GET: /plants route handler
+
+    Parameters
+    ----------
+    year : int
+        year of the data
+    top_n : Optional[int], optional
+        limit the output to the top N plants, by default None
+    state : Optional[str], optional
+        filter the output by state, by default None
+
+    Returns
+    -------
+    List[PlanNetGenerationModel]
+        plant annual net generation data
+    """
 
     try:
         path = get_datafile(year)
